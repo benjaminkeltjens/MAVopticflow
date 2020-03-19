@@ -16,3 +16,11 @@ How to proceed:
 3) Plot with python to see the optical flow vectors:
 
     python3 plotFlow.py
+
+
+
+For the lower resolution:
+put the correct path to the file you want to change in the lowerresolution.cpp file then
+compile like so:
+g++ lowerresolution.cpp -L/../../../../usr/include/opencv2 -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -o lowerresolution
+
