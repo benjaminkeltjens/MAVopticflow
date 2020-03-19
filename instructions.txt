@@ -1,0 +1,18 @@
+
+How to proceed:
+
+1) Generate images with the resolution that you want:
+
+    python3 saveImg_resolution.py
+
+
+2) Compile and execute the horn_schunck_classic.c:
+
+    make clean all
+    ./horn_schunck_classic 100 5 lowRes2/80211420.png lowRes2/80311426.png flow.flo
+
+    (This corresponds to ./horn_schunck_classic maxiter alpha image1 image2 output.flo)
+
+3) Plot with python to see the optical flow vectors:
+
+    python3 plotFlow.py
