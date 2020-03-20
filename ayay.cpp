@@ -1,6 +1,9 @@
 // Compile with: (change your -I and -L path to your corresponding locations)
 // g++ ayay2.cpp -I/usr/local/include/opencv4 -L/usr/local/lib -lopencv_optflow -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_video -o ayay2
 
+// The original example's code can be found at:
+// https://funvision.blogspot.com/2016/02/opencv-31-tutorial-optical-flow.html
+
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
 #include "opencv2/objdetect/objdetect.hpp"
