@@ -46,7 +46,7 @@ int main(int argc, const char** argv)
     // }
 
     // Select number of figure to calculate optical flow
-    int N = 280;
+    int N = 410;
 
     Mat original = imread(files[N]);
     Mat original_copy;
@@ -85,7 +85,7 @@ int main(int argc, const char** argv)
         for (int x = 0; x < flow.cols; x++)
         {
             const Point2f flowatxy = flow.at<Point2f>(y, x);
-            temp += (abs(flowatxy.y)+abs(flowatxy.x));
+            temp += hypot(flowatxy.y,flowatxy.x);
         }
         sum_flow_row[y] = temp;
         // cout << "Row :" << y << ", value: " << temp << endl;
@@ -103,6 +103,13 @@ int main(int argc, const char** argv)
     }
     float time_taken = (getTickCount() - start)/getTickFrequency();
     cout << "Time taken: " << time_taken << endl;
+
+    std::vector<float> normalised_heading_flow ((int)lower_height, 0);
+    for(int i = 0; i < (int)lower_height; i++) {
+    normalised_heading_flow[i] = (sum_flow_row[i]/max_value); // Become percentage from 0 to 1
+    std::cout << normalised_heading_flow[i] <<std::endl;
+    }
+
 
     float color_intensity{0};
     
