@@ -49,6 +49,19 @@ int main(int argc, const char** argv)
     int GB_parameter = 33;                  // Kernel size for Gaussian Blur (must be an odd number)
     float goTo_threshold = 0.10;            // OF threshold below which the heading is considered a safe go-to area
 
+    // Parameters for Farneback OF calculation:
+    float imScaleParam = 0.4; // Image pyramid or simple image scale
+    int pyrLayers = 1;        // No. Pyramid layers. [#1 means that flow is calculated only from previous image]
+    int winSize = 24;         // Flow is computed over the window. Larger value is more robust to the noise
+    int meanIt = 5;           // Mean number of iterations of algorithm
+    int polDegree = 8;        // Polynomial degree of expansion. Recommended values are between 5 - 7
+    float stDev = 1.2;        // Standard deviation used to smooth used derivatives. Recommended values are between 1.1 - 1,5
+    int extra = 0;
+
+    //----------------------------------------------------//
+    //----------------- END OF INPUTS --------------------//
+    //----------------------------------------------------//
+
     Mat original = imread(files[N]);        // Mat that stores inputImage1 in colour
     Mat original2 = imread(files[N+1]);     // Mat that stores inputImage2 in colour
     Mat initial_flow;                       // Mat that stores the initial (non-smoothed) normalised flow calculation  
@@ -77,7 +90,7 @@ int main(int argc, const char** argv)
 
 
     // Optical Flow calculation ->
-    calcOpticalFlowFarneback(target_image1, target_image2, flowUmat, 0.4, 1, 24, 5, 8, 1.2, 0);
+    calcOpticalFlowFarneback(target_image1, target_image2, flowUmat, imScaleParam, pyrLayers, winSize, meanIt, polDegree, stDev, extra);
     
     Mat flow; // Copy Umat container to standard Mat
     flowUmat.copyTo(flow);
@@ -85,8 +98,8 @@ int main(int argc, const char** argv)
 
     std::vector<double> sum_flow_row ((int)lower_height, 0);
     float temp = 0.0;
-    for (int y = 0; y < flow.rows; y++) {
-
+    for (int y = 0; y < flow.rows; y++) 
+    {
         for (int x = 0; x < flow.cols; x++)
         {
             const Point2f flowatxy = flow.at<Point2f>(y, x);
@@ -153,7 +166,7 @@ int main(int argc, const char** argv)
         for (int x = 0; x < flow.cols; x++)
         {
                 // Get the flow from y, x position. Change the * 2 to modify size of arrows
-                const Point2f flowatxy = flow.at<Point2f>(y, x) * 2;
+                // const Point2f flowatxy = flow.at<Point2f>(y, x) * 2;
                 // Draw line at flow direction
         
         // line(original, Point(x*(int)resolution_step_down, y*(int)resolution_step_down), Point(cvRound(x*(int)resolution_step_down + flowatxy.x), cvRound(y*(int)resolution_step_down + flowatxy.y)), Scalar(255,0,color_intensity));
