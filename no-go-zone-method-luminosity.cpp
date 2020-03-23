@@ -36,31 +36,6 @@ vector<string> globVector(const string& pattern){
     return files;
 }
 
-//cv::COLOR_BGR2RGB
-
-Mat return_higher_luminance(const Mat &original_image, int increase_luminosity){
-    Mat higherlum;
-    cvtColor(original_image, higherlum, cv::COLOR_BGR2YUV); //CV_BGR2YUV
-    uint8_t* pixelPtr = (uint8_t*)higherlum.data;
-    int cn = higherlum.channels();
-    for(int i = 0; i < higherlum.rows; i+=1){
-        for(int j = 0; j < higherlum.cols; j += 1)
-        {   
-            int change = increase_luminosity;
-            if(change <= 0){
-            pixelPtr[i*higherlum.cols*cn + j*cn + 0] = std::max(pixelPtr[i*higherlum.cols*cn + j*cn + 0] - increase_luminosity, 0);
-            }
-            else{
-                pixelPtr[i*higherlum.cols*cn + j*cn + 0] = std::min(pixelPtr[i*higherlum.cols*cn + j*cn + 0] + increase_luminosity, 255);
-            }
-    }
-
-    }
-    Mat lumconverted;
-    cvtColor(higherlum, lumconverted, cv::COLOR_YUV2BGR); //CV_YUV2BGR
-    return lumconverted;
-}
-
 int main(int argc, const char** argv)
 {
     // Collecting all filenames in ./jpg2png/ in files
@@ -69,13 +44,16 @@ int main(int argc, const char** argv)
     //----------------------------------------------------//
     //----------------- SOME INPUTS ----------------------//
     //----------------------------------------------------//
-    int N = 1;                            // Figure number
+
+    int N = 1;                              // Figure number
     float resolution_step_down = 3.0;       // Factor to low resolution
     int GB_parameter = 33;                  // Kernel size for Gaussian Blur (must be an odd number)
     float goTo_threshold = 0.10;            // OF threshold below which the heading is considered a safe go-to area
-    int luminosity_parameter = 40;
+    double alpha = 1.0;                     // Contrast control (1.0 - 3.0)
+    int beta = 100;                         // Brightness control (0 - 100)
 
     // Parameters for Farneback OF calculation:
+
     float imScaleParam = 0.4; // Image pyramid or simple image scale
     int pyrLayers = 1;        // No. Pyramid layers. [#1 means that flow is calculated only from previous image]
     int winSize = 24;         // Flow is computed over the window. Larger value is more robust to the noise
@@ -90,6 +68,20 @@ int main(int argc, const char** argv)
 
     Mat original = imread(files[N]);        // Mat that stores inputImage1 in colour
     Mat original2 = imread(files[N+1]);     // Mat that stores inputImage2 in colour
+
+
+    // Changing luminosity:
+    Mat aux_inputImage1;
+    Mat aux_inputImage2;
+    Mat inputImage1;
+    Mat inputImage2;
+    original.convertTo(aux_inputImage1, -1, alpha, beta);
+    original2.convertTo(aux_inputImage2, -1, alpha, beta);
+
+    // Converting images to greyscale:
+    cv::cvtColor(aux_inputImage1, inputImage1, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(aux_inputImage2, inputImage2, cv::COLOR_BGR2GRAY);
+
     Mat initial_flow;                       // Mat that stores the initial (non-smoothed) normalised flow calculation  
     Mat smooth;                             // Mat that stores the smooth OF after applying the GaussianBlur
     Mat min_area;                           // Mat that stores the highlighted recommended go-to areas (less flow than a certain threshold)
@@ -98,11 +90,6 @@ int main(int argc, const char** argv)
     original.copyTo(smooth);
     original.copyTo(min_area);
     cout << "Image 1 Name: " << files[N] << endl;
-    Mat aux_inputImage1 = imread(files[N], IMREAD_GRAYSCALE);
-    Mat aux_inputImage2 = imread(files[N+1], IMREAD_GRAYSCALE);
-
-    Mat inputImage1 = return_higher_luminance(aux_inputImage1, luminosity_parameter);
-    Mat inputImage2 = return_higher_luminance(aux_inputImage2, luminosity_parameter);
 
     Mat target_image1;
     Mat target_image2;
@@ -217,6 +204,9 @@ int main(int argc, const char** argv)
     imshow("min_area", min_area);
     imshow("inputImage1", original);
     imshow("inputImage2", original2);
+    imshow("ModifiedLum_inputImage1", aux_inputImage1);
+    imshow("ModifiedLum_inputImage2", aux_inputImage2);
+    //imshow("new_original", new_original);
     cv::waitKey(0);
 }
 
