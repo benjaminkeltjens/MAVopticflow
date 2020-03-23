@@ -36,15 +36,38 @@ vector<string> globVector(const string& pattern){
     return files;
 }
 
+Mat return_higher_luminance(const Mat &original_image, int increase_luminosity){
+    Mat higherlum;
+    cvtColor(original_image, higherlum, CV_BGR2YUV);
+    uint8_t* pixelPtr = (uint8_t*)higherlum.data;
+    int cn = higherlum.channels();
+    for(int i = 0; i < higherlum.rows; i+=1){
+        for(int j = 0; j < higherlum.cols; j += 1)
+        {   
+            int change = increase_luminosity;
+            if(change <= 0){
+            pixelPtr[i*higherlum.cols*cn + j*cn + 0] = std::max(pixelPtr[i*higherlum.cols*cn + j*cn + 0] - increase_luminosity, 0);
+            }
+            else{
+                pixelPtr[i*higherlum.cols*cn + j*cn + 0] = std::min(pixelPtr[i*higherlum.cols*cn + j*cn + 0] + increase_luminosity, 255);
+            }
+    }
+
+    }
+    Mat lumconverted;
+    cvtColor(higherlum, lumconverted, CV_YUV2BGR);
+    return lumconverted;
+}
+
 int main(int argc, const char** argv)
 {
     // Collecting all filenames in ./jpg2png/ in files
-    vector<string> files = globVector("/home/marina/Dropbox/TUDelft/Subjects/Q3/MAVs/ourProject/AE4317_2019_datasets/sim_poles_panels/20190121-161422/*");
+    vector<string> files = globVector("./new_files/*");
 
     //----------------------------------------------------//
     //----------------- SOME INPUTS ----------------------//
     //----------------------------------------------------//
-    int N = 300;                            // Figure number
+    int N = 305;                            // Figure number
     float resolution_step_down = 3.0;       // Factor to low resolution
     int GB_parameter = 33;                  // Kernel size for Gaussian Blur (must be an odd number)
     float goTo_threshold = 0.10;            // OF threshold below which the heading is considered a safe go-to area
@@ -186,7 +209,11 @@ int main(int argc, const char** argv)
     imshow("smooth", smooth);
     imshow("min_area", min_area);
     imshow("inputImage1", original);
-    imshow("inputImage2", original2);
+
+
+    Mat lumconverted = return_higher_luminance(original, 40);
+
+    imshow("inputImage2", lumconverted);
     cv::waitKey(0);
 }
 
