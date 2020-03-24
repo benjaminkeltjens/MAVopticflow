@@ -45,12 +45,12 @@ int main(int argc, const char** argv)
     //----------------- SOME INPUTS ----------------------//
     //----------------------------------------------------//
 
-    int N = 1;                              // Figure number
+    int N = 0;                              // Figure number
     float resolution_step_down = 3.0;       // Factor to low resolution
     int GB_parameter = 33;                  // Kernel size for Gaussian Blur (must be an odd number)
     float goTo_threshold = 0.10;            // OF threshold below which the heading is considered a safe go-to area
     double alpha = 1.0;                     // Contrast control (1.0 - 3.0)
-    int beta = 100;                         // Brightness control (0 - 100)
+    int beta = 0;                         // Brightness control (0 - 100)
 
     // Parameters for Farneback OF calculation:
 
@@ -197,16 +197,27 @@ int main(int argc, const char** argv)
     }
     // line(original, Point(0,original.rows/2), Point(original.cols,original.rows/2), Scalar(0,255,0),2); // green midline
     
-    // Draw the results
-    //namedWindow("prew", WINDOW_AUTOSIZE);
+    // Draw the results:
     imshow("initial_flow", initial_flow);
+    moveWindow("initial_flow", 0,0);
+
     imshow("smooth", smooth);
+    moveWindow("smooth", 300,0);
+
     imshow("min_area", min_area);
+    moveWindow("min_area", 540,0);
+
     imshow("inputImage1", original);
+    moveWindow("inputImage1", 780,0);
+
     imshow("inputImage2", original2);
+    moveWindow("inputImage2", 1020,0);
+
     imshow("ModifiedLum_inputImage1", aux_inputImage1);
+    moveWindow("ModifiedLum_inputImage1", 1260,0);
+
     imshow("ModifiedLum_inputImage2", aux_inputImage2);
-    //imshow("new_original", new_original);
+    moveWindow("ModifiedLum_inputImage2", 1500,0);
     cv::waitKey(0);
 }
 
