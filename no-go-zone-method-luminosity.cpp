@@ -39,18 +39,18 @@ vector<string> globVector(const string& pattern){
 int main(int argc, const char** argv)
 {
     // Collecting all filenames in ./jpg2png/ in files
-    vector<string> files = globVector("/home/marina/Dropbox/TUDelft/Subjects/Q3/MAVs/ourProject/codeClassicGit/interestingPairs/*");
+    vector<string> files = globVector("/home/marina/Dropbox/TUDelft/Subjects/Q3/MAVs/ourProject/AE4317_2019_datasets/sim_poles/20190121-160844/*");
 
     //----------------------------------------------------//
     //----------------- SOME INPUTS ----------------------//
     //----------------------------------------------------//
 
-    int N = 0;                              // Figure number
+    int N = 350;                              // Figure number
     float resolution_step_down = 3.0;       // Factor to low resolution
     int GB_parameter = 33;                  // Kernel size for Gaussian Blur (must be an odd number)
-    float goTo_threshold = 0.10;            // OF threshold below which the heading is considered a safe go-to area
+    float goTo_threshold = 0.05;            // OF threshold below which the heading is considered a safe go-to area
     double alpha = 1.0;                     // Contrast control (1.0 - 3.0)
-    int beta = 0;                         // Brightness control (0 - 100)
+    int beta = 50;                         // Brightness control (0 - 100)
 
     // Parameters for Farneback OF calculation:
 
@@ -85,8 +85,10 @@ int main(int argc, const char** argv)
     Mat initial_flow;                       // Mat that stores the initial (non-smoothed) normalised flow calculation  
     Mat smooth;                             // Mat that stores the smooth OF after applying the GaussianBlur
     Mat min_area;                           // Mat that stores the highlighted recommended go-to areas (less flow than a certain threshold)
+    Mat OF_plot;
 
     // Initializing variables (reading files, etc.) ->
+    original.copyTo(OF_plot);
     original.copyTo(smooth);
     original.copyTo(min_area);
     cout << "Image 1 Name: " << files[N] << endl;
@@ -183,41 +185,61 @@ int main(int argc, const char** argv)
         for (int x = 0; x < flow.cols; x++)
         {
                 // Get the flow from y, x position. Change the * 2 to modify size of arrows
-                // const Point2f flowatxy = flow.at<Point2f>(y, x) * 2;
+        const Point2f flowatxy = flow.at<Point2f>(y, x) * 2;
                 // Draw line at flow direction
         
-        // line(original, Point(x*(int)resolution_step_down, y*(int)resolution_step_down), Point(cvRound(x*(int)resolution_step_down + flowatxy.x), cvRound(y*(int)resolution_step_down + flowatxy.y)), Scalar(255,0,color_intensity));
+         //line(original, Point(x*(int)resolution_step_down, y*(int)resolution_step_down), Point(cvRound(x*(int)resolution_step_down + flowatxy.x), cvRound(y*(int)resolution_step_down + flowatxy.y)), Scalar(255,0,color_intensity));
                 // Draw initial point
-        // line(original, Point(x*(int)resolution_step_down, y*(int)resolution_step_down), Point(cvRound(x*(int)resolution_step_down + flowatxy.x), cvRound(y*(int)resolution_step_down + flowatxy.y)), Scalar(0,0,255));
-        // circle(original, Point(x*(int)resolution_step_down, y*(int)resolution_step_down), 1, Scalar(0, 0, 0), -1);
+         line(OF_plot, Point(x*(int)resolution_step_down, y*(int)resolution_step_down), Point(cvRound(x*(int)resolution_step_down + flowatxy.x), cvRound(y*(int)resolution_step_down + flowatxy.y)), Scalar(0,0,255));
+         circle(OF_plot, Point(x*(int)resolution_step_down, y*(int)resolution_step_down), 1, Scalar(0, 0, 0), -1);
         }
         line(initial_flow, Point(0,y*resolution_step_down), Point(original.cols,y*resolution_step_down), Scalar(255,color_intensity,0),1*resolution_step_down);
         line(smooth, Point(0,y*resolution_step_down), Point(original.cols,y*resolution_step_down), Scalar(255,color_intensity_smooth,0),1*resolution_step_down);
         line(min_area, Point(0,y*resolution_step_down), Point(original.cols,y*resolution_step_down), Scalar(255,color_intensity_smooth_goTo,0),1*resolution_step_down);
     }
     // line(original, Point(0,original.rows/2), Point(original.cols,original.rows/2), Scalar(0,255,0),2); // green midline
-    
+    /*
+    for (int y = 0; y < flow.rows; y += 2) {
+        for (int x = 0; x < flow.cols; y += 2){
+        const Point2f flowatxy = flow.at<Point2f>(y, x) * 2;
+        line(OF_plot, Point(x*(int)resolution_step_down, y*(int)resolution_step_down), Point(cvRound(x*(int)resolution_step_down + flowatxy.x), cvRound(y*(int)resolution_step_down + flowatxy.y)), Scalar(0,0,255));
+        circle(OF_plot, Point(x*(int)resolution_step_down, y*(int)resolution_step_down), 1, Scalar(0, 0, 0), -1);
+    }
+}
+*/
+
     // Draw the results:
     imshow("initial_flow", initial_flow);
     moveWindow("initial_flow", 0,0);
+    imwrite("images_report/initial_flow.jpg",initial_flow);
 
     imshow("smooth", smooth);
     moveWindow("smooth", 300,0);
+    imwrite("images_report/smooth.jpg",smooth);
 
     imshow("min_area", min_area);
     moveWindow("min_area", 540,0);
+    imwrite("images_report/min_area.jpg",min_area);
 
     imshow("inputImage1", original);
     moveWindow("inputImage1", 780,0);
+    imwrite("images_report/original.jpg",original);
 
     imshow("inputImage2", original2);
     moveWindow("inputImage2", 1020,0);
+    imwrite("images_report/original2.jpg",original2);
 
     imshow("ModifiedLum_inputImage1", aux_inputImage1);
     moveWindow("ModifiedLum_inputImage1", 1260,0);
+    imwrite("images_report/aux_inputImage1.jpg",aux_inputImage1);
 
     imshow("ModifiedLum_inputImage2", aux_inputImage2);
     moveWindow("ModifiedLum_inputImage2", 1500,0);
+    imwrite("images_report/aux_inputImage2.jpg",aux_inputImage2);
+
+    imshow("OF_plot", OF_plot);
+    moveWindow("OF_plot", 0,600);
+    imwrite("images_report/OF_plot.jpg",OF_plot);
     cv::waitKey(0);
 }
 
